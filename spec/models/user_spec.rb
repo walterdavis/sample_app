@@ -3,8 +3,8 @@ require 'spec_helper'
 describe User do
 
   before do
-   @user = User.new(name: "Example User", email: "user@example.com",
-                    password: "foobar", password_confirmation: "foobar")
+    @user = User.new(name: "Example User", email: "user@example.com",
+    password: "foobar", password_confirmation: "foobar")
   end
 
   subject { @user }
@@ -19,20 +19,27 @@ describe User do
   it { should respond_to(:admin) }
   it { should respond_to(:microposts) }
   it { should respond_to(:feed) }
-  
+  it { should respond_to(:relationships) }
+  it { should respond_to(:followed_users) }
+  it { should respond_to(:reverse_relationships) }
+  it { should respond_to(:followers) }
+  it { should respond_to(:following?) }
+  it { should respond_to(:follow!) }
+  it { should respond_to(:unfollow!) }
+
 
   it { should be_valid }
   it { should_not be_admin }
-  
-  describe "with admin attribute set to 'true'" do
-     before do
-       @user.save!
-       @user.toggle!(:admin)
-     end
 
-     it { should be_admin }
-   end
-  
+  describe "with admin attribute set to 'true'" do
+    before do
+      @user.save!
+      @user.toggle!(:admin)
+    end
+
+    it { should be_admin }
+  end
+
 
   describe "when name is not present" do
     before { @user.name = " " }
@@ -111,7 +118,7 @@ describe User do
       let(:user_for_invalid_password) { found_user.authenticate("invalid") }
       it { should_not == user_for_invalid_password }
       specify { expect(user_for_invalid_password).to be_false }
-      
+
     end
   end
 
@@ -119,7 +126,7 @@ describe User do
     before { @user.save }
     its(:remember_token) { should_not be_blank }
   end
-  
+
   describe "micropost associations" do
 
     before { @user.save }
@@ -151,8 +158,34 @@ describe User do
       its(:feed) { should_not include(unfollowed_post) }
     end
     
+    
+
   end
-  
-  
-  
+
+  describe "following" do
+    let(:other_user) { FactoryGirl.create(:user) }
+    before do
+      @user.save
+      @user.follow!(other_user)
+    end
+
+    it { should be_following(other_user) }
+    its(:followed_users) { should include(other_user) }
+
+    describe "followed user" do
+      subject { other_user }
+      its(:followers) { should include(@user) }
+    end
+
+    describe "and unfollowing" do
+      before { @user.unfollow!(other_user) }
+
+      it { should_not be_following(other_user) }
+      its(:followed_users) { should_not include(other_user) }
+    end
+
+  end
+
+
+
 end
