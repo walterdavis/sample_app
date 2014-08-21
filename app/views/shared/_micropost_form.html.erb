@@ -2,6 +2,22 @@
   <%= render 'shared/error_messages', object: f.object %>
   <div class="field">
     <%= f.text_area :content, placeholder: "Compose new micropost..." %>
+    <output class="pull-right" id="countdown">140</output>
   </div>
   <%= f.submit "Post", class: "btn btn-large btn-primary" %>
 <% end %>
+<script type="text/javascript" charset="utf-8">
+  var input = document.getElementById('micropost_content');
+  var output = document.getElementById('countdown');
+  setInterval(function(){
+    var l = input.value.length;
+    if(l <= 140) {
+      input.parentNode.classList.remove('field_with_errors');
+      output.classList.remove('too-long');
+    }else{
+      input.parentNode.classList.add('field_with_errors');
+      output.classList.add('too-long');
+    }
+    output.value = 140 - l;
+  },20);
+</script>
